@@ -1,7 +1,7 @@
 # detskistapki-static
 Repository containing detskistapki-static
 
-# Nginx Docker Deployment
+# detskistapki Docker Deployment
 
 This project uses Docker to deploy a static website using the official Nginx image.
 
