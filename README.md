@@ -59,13 +59,23 @@ docker-compose down
 
 ## File Structure
 ```
-/project-root
-  |-- Dockerfile
-  |-- docker-compose.yml
-  |-- html/
-      |-- index.html
-      |-- styles.css
-  |-- README.md
+/detskistapki-static
+├── Dockerfile
+├── README.md
+├── docker-compose.yml
+├── index.html
+├── pages
+│   ├── Contacts.html
+│   ├── UsefulInformation.html
+│   ├── Work.html
+│   └── time-table.html
+├── refresh.sh
+└── styles
+    ├── contact.css
+    ├── main.css
+    ├── navbar.css
+    ├── timetable.css
+    └── work.css
 ```
 
 ## Notes
