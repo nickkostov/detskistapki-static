@@ -30,7 +30,10 @@ jobs:
           npm run build
           touch dist/.nojekyll
 
-      - name: Upload dist/ as GitHub Pages artifact
+      - name: List dist contents (debug)
+        run: ls -R dist
+
+      - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
