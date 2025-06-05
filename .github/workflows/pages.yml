@@ -1,43 +1,58 @@
-name: Deploy to GitHub Pages
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy static content to Pages
+
 on:
   push:
-    branches: [master]
-permissions: write-all
+    branches: ['develop']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
 jobs:
+  # Single deploy job
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build project
+      - name: Build Vite project
         run: |
           npm run build
           touch dist/.nojekyll
 
-      - name: Debug: list dist contents
-        run: |
-          echo "[DIST CONTENTS]"
-          ls -lh dist
-          echo "[INDEX.HTML HEAD]"
-          head -n 20 dist/index.html
+      - name: List Files
+        run: ls -lah dist
 
-      - name: Upload Pages artifact
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
-          name: github-pages
+          path: 'dist'
 
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v3
-        with:
-          artifact_name: github-pages
+        id: deployment
+        uses: actions/deploy-pages@v4
