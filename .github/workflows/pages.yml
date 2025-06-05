@@ -1,4 +1,4 @@
-name: Build and Deploy to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -12,6 +12,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,6 +29,13 @@ jobs:
         run: |
           npm run build
           touch dist/.nojekyll
+
+      - name: Debug: list dist contents
+        run: |
+          echo "[DIST CONTENTS]"
+          ls -lh dist
+          echo "[INDEX.HTML HEAD]"
+          head -n 20 dist/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
