@@ -2,7 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const images = ['detskistapki_logo.jpg', '/bg2.jpg', '/bg3.jpg'];
+const images = [
+  'stapki.svg', 
+  '/bg2.jpg', 
+  '/bg3.jpg'
+];
 
 export const Hero: React.FC = () => {
   const heroRef = useRef<HTMLDivElement>(null);
