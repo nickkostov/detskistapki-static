@@ -39,20 +39,19 @@ export const Hero: React.FC = () => {
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Carousel Background */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 flex items-center justify-center">
         <AnimatePresence>
           <motion.img
             key={images[index]}
             src={images[index]}
-            alt="Background"
+            alt="Logo"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.5 }}
-            className="w-full h-full object-cover absolute inset-0"
+            className="max-w-[300px] w-full h-auto"
           />
         </AnimatePresence>
-        <div className="absolute inset-0 bg-black bg-opacity-40" /> {/* Optional dark overlay */}
       </div>
 
       {/* Content */}
