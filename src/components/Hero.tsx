@@ -3,9 +3,9 @@ import { ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const images = [
-  'stapki.svg', 
-  '/bg2.jpg', 
-  '/bg3.jpg'
+  'detskistapki_logo.svg', 
+ // '/bg2.jpg', 
+ // '/bg3.jpg'
 ];
 
 export const Hero: React.FC = () => {
