@@ -33,7 +33,9 @@ const testimonials: TestimonialProps[] = [
   }
 ];
 
-const Testimonial: React.FC<TestimonialProps> = ({ content, author, role, rating, imageSrc }) => {
+const Testimonial: React.FC<TestimonialProps & { allowExternalImages: boolean }> = ({
+  content, author, role, rating, imageSrc, allowExternalImages
+}) => {
   return (
     <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
       <div className="flex items-center mb-4">
@@ -47,11 +49,21 @@ const Testimonial: React.FC<TestimonialProps> = ({ content, author, role, rating
       </div>
       <p className="text-gray-700 mb-6 italic">"{content}"</p>
       <div className="flex items-center">
-        <img
-          src={imageSrc}
-          alt={author}
-          className="w-12 h-12 rounded-full object-cover mr-4"
-        />
+        {allowExternalImages ? (
+          <img
+            src={imageSrc}
+            alt=""
+            loading="lazy"
+            className="mr-4 h-12 w-12 rounded-full object-cover"
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="mr-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-700"
+          >
+            {author.split(' ').map((name) => name[0]).join('')}
+          </div>
+        )}
         <div>
           <h4 className="font-semibold text-gray-900">{author}</h4>
           <p className="text-gray-600 text-sm">{role}</p>
@@ -61,7 +73,7 @@ const Testimonial: React.FC<TestimonialProps> = ({ content, author, role, rating
   );
 };
 
-export const Testimonials: React.FC = () => {
+export const Testimonials: React.FC<{ allowExternalImages: boolean }> = ({ allowExternalImages }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const timeoutRef = useRef<number | null>(null);
   
@@ -111,7 +123,7 @@ export const Testimonials: React.FC = () => {
             >
               {testimonials.map((testimonial, index) => (
                 <div key={index} className="w-full flex-shrink-0 px-4">
-                  <Testimonial {...testimonial} />
+                  <Testimonial {...testimonial} allowExternalImages={allowExternalImages} />
                 </div>
               ))}
             </div>

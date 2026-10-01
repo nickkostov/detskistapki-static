@@ -1,5 +1,18 @@
 import React, { useState } from 'react';
-import { Send, Mail, Phone, MapPin } from 'lucide-react';
+import { Send, Mail, Phone, MapPin, RefreshCw } from 'lucide-react';
+
+const randomInt = (min: number, max: number) =>
+  Math.floor(Math.random() * (max - min + 1)) + min;
+
+const createCaptcha = () => {
+  const first = randomInt(3, 7);
+  const second = randomInt(2, 5);
+  const third = randomInt(1, 3);
+
+  return Math.random() < 0.5
+    ? { question: `(${first} + ${second}) − ${third}`, answer: first + second - third }
+    : { question: `(${first} × ${second}) + ${third}`, answer: first * second + third };
+};
 
 export const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -7,11 +20,24 @@ export const Contact: React.FC = () => {
     email: '',
     message: ''
   });
+  const [captcha, setCaptcha] = useState(createCaptcha);
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (Number(captchaAnswer) !== captcha.answer) {
+      setCaptchaError('Неправилен отговор. Опитайте отново.');
+      setCaptchaAnswer('');
+      return;
+    }
+
     console.log('Form submitted:', formData);
     setFormData({ name: '', email: '', message: '' });
+    setCaptcha(createCaptcha());
+    setCaptchaAnswer('');
+    setCaptchaError('');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -113,6 +139,49 @@ export const Contact: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               ></textarea>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <label htmlFor="captcha-answer" className="block text-sm font-medium text-gray-700 mb-2">
+                Проверка: колко е {captcha.question}?
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  id="captcha-answer"
+                  name="captcha-answer"
+                  min="0"
+                  step="1"
+                  inputMode="numeric"
+                  value={captchaAnswer}
+                  onChange={(e) => {
+                    setCaptchaAnswer(e.target.value);
+                    setCaptchaError('');
+                  }}
+                  aria-invalid={Boolean(captchaError)}
+                  aria-describedby={captchaError ? 'captcha-error' : undefined}
+                  className="w-28 rounded-md border border-gray-300 bg-white px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCaptcha(createCaptcha());
+                    setCaptchaAnswer('');
+                    setCaptchaError('');
+                  }}
+                  className="rounded-md p-2 text-gray-600 hover:bg-gray-200 hover:text-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                  aria-label="Нова задача"
+                  title="Нова задача"
+                >
+                  <RefreshCw size={20} />
+                </button>
+              </div>
+              {captchaError && (
+                <p id="captcha-error" role="alert" className="mt-2 text-sm text-red-600">
+                  {captchaError}
+                </p>
+              )}
             </div>
 
             <button

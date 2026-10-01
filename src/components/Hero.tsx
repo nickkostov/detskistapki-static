@@ -31,7 +31,7 @@ export const Hero: React.FC = () => {
           src={logo}
           alt="Лого"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.08 }} // Прозрачно
+          animate={{ opacity: 0.12 }} // Прозрачно
           transition={{ duration: 1.5 }}
           className="w-[80%] max-w-5xl h-auto object-contain"
         />
