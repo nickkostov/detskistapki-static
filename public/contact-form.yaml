@@ -2,3 +2,39 @@
 email_form:
   enabled: true
   captcha_enabled: true
+  title: "Свържете се с Нас"
+  description: "Имате въпроси или искате да запишете час? Ще се радваме да се свържем с Вас."
+  submit_label: "Изпрати съобщение"
+  disabled_message: "Формата за контакт временно не е достъпна."
+  captcha_question: "Проверка: колко е {question}?"
+  captcha_error: "Неправилен отговор. Опитайте отново."
+  captcha_refresh_label: "Нова задача"
+  contact:
+    email_label: "Имейл"
+    emails:
+      - contact@example.com
+      - support@example.com
+    phone_label: "Телефон"
+    phone: "+359 888 123 456"
+    hours: "Пон - Пет, 9:00 - 18:00"
+    address_label: "Адрес"
+    address_lines:
+      - "ул. Примерна 123"
+      - "София, 1000"
+  fields:
+    name:
+      label: "Име"
+      placeholder: ""
+      required: true
+      max_length: 100
+    email:
+      label: "Имейл"
+      placeholder: ""
+      required: true
+      max_length: 254
+    message:
+      label: "Съобщение"
+      placeholder: ""
+      required: true
+      max_length: 5000
+      rows: 4

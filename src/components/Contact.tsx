@@ -50,7 +50,7 @@ export const Contact: React.FC = () => {
     if (!formSettings?.enabled) return;
 
     if (formSettings.captchaEnabled && Number(captchaAnswer) !== captcha.answer) {
-      setCaptchaError('Неправилен отговор. Опитайте отново.');
+      setCaptchaError(formSettings.captchaError);
       setCaptchaAnswer('');
       return;
     }
@@ -69,15 +69,27 @@ export const Contact: React.FC = () => {
     });
   };
 
+  if (!formSettings) {
+    return (
+      <section id="contact" className="bg-white py-20">
+        <div className="mx-auto max-w-7xl px-4 text-center text-gray-700 sm:px-6 lg:px-8" role="status">
+          {settingsFailed
+            ? 'Информацията за контакт временно не е достъпна.'
+            : 'Зареждане на информацията за контакт...'}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="contact" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Свържете се с Нас
+            {formSettings.title}
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Имате въпроси или искате да запишете час? Ще се радваме да се свържем с Вас.
+            {formSettings.description}
           </p>
         </div>
 
@@ -88,9 +100,10 @@ export const Contact: React.FC = () => {
                 <Mail className="text-blue-600" size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Имейл</h3>
-                <p className="text-gray-600">contact@example.com</p>
-                <p className="text-gray-600">support@example.com</p>
+                <h3 className="text-lg font-semibold text-gray-900">{formSettings.contact.emailLabel}</h3>
+                {formSettings.contact.emails.map((email) => (
+                  <p key={email} className="text-gray-600">{email}</p>
+                ))}
               </div>
             </div>
 
@@ -99,9 +112,9 @@ export const Contact: React.FC = () => {
                 <Phone className="text-blue-600" size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Телефон</h3>
-                <p className="text-gray-600">+359 888 123 456</p>
-                <p className="text-gray-600">Пон - Пет, 9:00 - 18:00</p>
+                <h3 className="text-lg font-semibold text-gray-900">{formSettings.contact.phoneLabel}</h3>
+                <p className="text-gray-600">{formSettings.contact.phone}</p>
+                <p className="text-gray-600">{formSettings.contact.hours}</p>
               </div>
             </div>
 
@@ -110,18 +123,19 @@ export const Contact: React.FC = () => {
                 <MapPin className="text-blue-600" size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Адрес</h3>
-                <p className="text-gray-600">ул. Примерна 123</p>
-                <p className="text-gray-600">София, 1000</p>
+                <h3 className="text-lg font-semibold text-gray-900">{formSettings.contact.addressLabel}</h3>
+                {formSettings.contact.addressLines.map((line) => (
+                  <p key={line} className="text-gray-600">{line}</p>
+                ))}
               </div>
             </div>
           </div>
 
-          {formSettings?.enabled ? (
+          {formSettings.enabled ? (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Име
+                  {formSettings.fields.name.label}
                 </label>
                 <input
                   type="text"
@@ -129,14 +143,16 @@ export const Contact: React.FC = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
+                  placeholder={formSettings.fields.name.placeholder}
+                  maxLength={formSettings.fields.name.maxLength}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
+                  required={formSettings.fields.name.required}
                 />
               </div>
 
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Имейл
+                  {formSettings.fields.email.label}
                 </label>
                 <input
                   type="email"
@@ -144,30 +160,34 @@ export const Contact: React.FC = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
+                  placeholder={formSettings.fields.email.placeholder}
+                  maxLength={formSettings.fields.email.maxLength}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
+                  required={formSettings.fields.email.required}
                 />
               </div>
 
               <div>
                 <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                  Съобщение
+                  {formSettings.fields.message.label}
                 </label>
                 <textarea
                   id="message"
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  rows={4}
+                  placeholder={formSettings.fields.message.placeholder}
+                  maxLength={formSettings.fields.message.maxLength}
+                  rows={formSettings.fields.message.rows}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
+                  required={formSettings.fields.message.required}
                 ></textarea>
               </div>
 
               {formSettings.captchaEnabled && (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
                   <label htmlFor="captcha-answer" className="block text-sm font-medium text-gray-700 mb-2">
-                    Проверка: колко е {captcha.question}?
+                    {formSettings.captchaQuestion.replace('{question}', captcha.question)}
                   </label>
                   <div className="flex items-center gap-3">
                     <input
@@ -195,8 +215,8 @@ export const Contact: React.FC = () => {
                         setCaptchaError('');
                       }}
                       className="rounded-md p-2 text-gray-600 hover:bg-gray-200 hover:text-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                      aria-label="Нова задача"
-                      title="Нова задача"
+                      aria-label={formSettings.captchaRefreshLabel}
+                      title={formSettings.captchaRefreshLabel}
                     >
                       <RefreshCw size={20} />
                     </button>
@@ -213,15 +233,13 @@ export const Contact: React.FC = () => {
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-md transition-colors flex items-center justify-center group"
               >
-                Изпрати съобщение
+                {formSettings.submitLabel}
                 <Send className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
               </button>
             </form>
           ) : (
             <p role="status" className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-gray-700">
-              {formSettings === null && !settingsFailed
-                ? 'Зареждане на формата...'
-                : 'Формата за контакт временно не е достъпна.'}
+              {formSettings.disabledMessage}
             </p>
           )}
         </div>
