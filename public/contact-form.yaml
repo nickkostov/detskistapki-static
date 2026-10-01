@@ -1,0 +1,4 @@
+# This file is public. Do not put passwords or API keys here.
+email_form:
+  enabled: true
+  captcha_enabled: true

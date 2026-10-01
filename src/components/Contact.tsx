@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Send, Mail, Phone, MapPin, RefreshCw } from 'lucide-react';
+import { loadContactFormSettings, type ContactFormSettings } from '../config/contactForm';
 
 const randomInt = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
@@ -15,6 +16,8 @@ const createCaptcha = () => {
 };
 
 export const Contact: React.FC = () => {
+  const [formSettings, setFormSettings] = useState<ContactFormSettings | null>(null);
+  const [settingsFailed, setSettingsFailed] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -24,10 +27,29 @@ export const Contact: React.FC = () => {
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [captchaError, setCaptchaError] = useState('');
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    loadContactFormSettings(controller.signal)
+      .then((settings) => {
+        if (!controller.signal.aborted) setFormSettings(settings);
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          console.error('Contact form settings could not be loaded:', error);
+          setSettingsFailed(true);
+        }
+      });
+
+    return () => controller.abort();
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (Number(captchaAnswer) !== captcha.answer) {
+    if (!formSettings?.enabled) return;
+
+    if (formSettings.captchaEnabled && Number(captchaAnswer) !== captcha.answer) {
       setCaptchaError('Неправилен отговор. Опитайте отново.');
       setCaptchaAnswer('');
       return;
@@ -95,103 +117,113 @@ export const Contact: React.FC = () => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Име
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Имейл
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                Съобщение
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              ></textarea>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <label htmlFor="captcha-answer" className="block text-sm font-medium text-gray-700 mb-2">
-                Проверка: колко е {captcha.question}?
-              </label>
-              <div className="flex items-center gap-3">
+          {formSettings?.enabled ? (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Име
+                </label>
                 <input
-                  type="number"
-                  id="captcha-answer"
-                  name="captcha-answer"
-                  min="0"
-                  step="1"
-                  inputMode="numeric"
-                  value={captchaAnswer}
-                  onChange={(e) => {
-                    setCaptchaAnswer(e.target.value);
-                    setCaptchaError('');
-                  }}
-                  aria-invalid={Boolean(captchaError)}
-                  aria-describedby={captchaError ? 'captcha-error' : undefined}
-                  className="w-28 rounded-md border border-gray-300 bg-white px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCaptcha(createCaptcha());
-                    setCaptchaAnswer('');
-                    setCaptchaError('');
-                  }}
-                  className="rounded-md p-2 text-gray-600 hover:bg-gray-200 hover:text-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                  aria-label="Нова задача"
-                  title="Нова задача"
-                >
-                  <RefreshCw size={20} />
-                </button>
               </div>
-              {captchaError && (
-                <p id="captcha-error" role="alert" className="mt-2 text-sm text-red-600">
-                  {captchaError}
-                </p>
-              )}
-            </div>
 
-            <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-md transition-colors flex items-center justify-center group"
-            >
-              Изпрати съобщение
-              <Send className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
-            </button>
-          </form>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Имейл
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                  Съобщение
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  rows={4}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                ></textarea>
+              </div>
+
+              {formSettings.captchaEnabled && (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                  <label htmlFor="captcha-answer" className="block text-sm font-medium text-gray-700 mb-2">
+                    Проверка: колко е {captcha.question}?
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      id="captcha-answer"
+                      name="captcha-answer"
+                      min="0"
+                      step="1"
+                      inputMode="numeric"
+                      value={captchaAnswer}
+                      onChange={(e) => {
+                        setCaptchaAnswer(e.target.value);
+                        setCaptchaError('');
+                      }}
+                      aria-invalid={Boolean(captchaError)}
+                      aria-describedby={captchaError ? 'captcha-error' : undefined}
+                      className="w-28 rounded-md border border-gray-300 bg-white px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCaptcha(createCaptcha());
+                        setCaptchaAnswer('');
+                        setCaptchaError('');
+                      }}
+                      className="rounded-md p-2 text-gray-600 hover:bg-gray-200 hover:text-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                      aria-label="Нова задача"
+                      title="Нова задача"
+                    >
+                      <RefreshCw size={20} />
+                    </button>
+                  </div>
+                  {captchaError && (
+                    <p id="captcha-error" role="alert" className="mt-2 text-sm text-red-600">
+                      {captchaError}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-md transition-colors flex items-center justify-center group"
+              >
+                Изпрати съобщение
+                <Send className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
+              </button>
+            </form>
+          ) : (
+            <p role="status" className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-gray-700">
+              {formSettings === null && !settingsFailed
+                ? 'Зареждане на формата...'
+                : 'Формата за контакт временно не е достъпна.'}
+            </p>
+          )}
         </div>
       </div>
     </section>
